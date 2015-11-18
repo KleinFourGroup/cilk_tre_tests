@@ -33,10 +33,11 @@ void merge_sort(int *B, int *A, int n) {
   if (n==1) {
     B[0] = A[0];
   } else {
-    int C[n];
+    int * C = (int *)malloc(n*sizeof(int));
     merge_sort(C, A, n/2);
     merge_sort(C+n/2, A+n/2, n-n/2);
     merge(B, C, n/2, C+n/2, n-n/2);
+    free(C);
   }
 }
 
@@ -44,11 +45,12 @@ void cmerge_sort(int *B, int *A, int n) {
   if (n==1) {
     B[0] = A[0];
   } else {
-    int C[n];
+    int * C = (int *)malloc(n*sizeof(int));
     cilk_spawn cmerge_sort(C, A, n/2);
     cmerge_sort(C+n/2, A+n/2, n-n/2);
     cilk_sync;
     merge(B, C, n/2, C+n/2, n-n/2);
+    free(C);
   }
 }
 
@@ -57,7 +59,7 @@ void merge_sort_tre(int *B, int *A, int n) {
   if (n==1) {
     B[0] = A[0];
   } else {
-    int C[n];
+    int * C = (int *)malloc(n*sizeof(int));
     int * Cp = C;
     int * Ap = A;
     int m = n;
@@ -76,6 +78,7 @@ void merge_sort_tre(int *B, int *A, int n) {
       m = 2*m;
       //arr_cpy(Cp, B+n-m, m);
     }
+    free(C);
   }
 }
 
@@ -84,7 +87,7 @@ void cmerge_sort_tre(int *B, int *A, int n) {
   if (n==1) {
     B[0] = A[0];
   } else {
-    int C[n];
+    int * C = (int *)malloc(n*sizeof(int));
     int * Cp = C;
     int * Ap = A;
     int m = n;
@@ -104,6 +107,7 @@ void cmerge_sort_tre(int *B, int *A, int n) {
       m = 2*m;
       //arr_cpy(Cp, B+n-m, m);
     }
+    free(C);
   }
 }
 
@@ -119,10 +123,10 @@ int main() {
   int n = 1<<18;
   std::cout << n << std::endl;
   srand(time(NULL));
-  int A[n];
+  int * A = (int *)malloc(n*sizeof(int));
   for(int i = 0; i < n; i++) A[i] = rand()%10;
   //print_arr(A, n);
-  int B[n];
+  int * B = (int *)malloc(n*sizeof(int));
   t = clock();
   merge_sort(B, A, n);
   t = clock() - t;
@@ -143,5 +147,7 @@ int main() {
   t = clock() - t;
   std::cout <<  "In " << t * 1.0 / CLOCKS_PER_SEC << " cmerge_sort_tre is " << isSorted(B, n) << std::endl;
   //print_arr(B, n);
+  free(A);
+  free(B)
   return 0;
 }
