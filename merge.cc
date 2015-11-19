@@ -112,6 +112,15 @@ void crec_merge(int *C, int *A, int na, int *B, int nb) {
 
 void rec_merge_tre(int *C, int *A, int na, int *B, int nb) {
   while (na > 0) {
+    int ma = na/2;
+    int mb = binary_search(A[ma], B, nb);
+    C[ma+mb] = A[ma];
+    rec_merge_tre(C, A, ma, B, mb);
+    C = C+ma+mb+1;
+    A = A+ma+1;
+    na = na-ma-1;
+    B = B+mb;
+    nb = nb-mb;
     if (na < nb) {
       int *tmp = B;
       B = A;
@@ -119,22 +128,21 @@ void rec_merge_tre(int *C, int *A, int na, int *B, int nb) {
       int t = nb;
       nb = na;
       na = t;
-    } else {
-      int ma = na/2;
-      int mb = binary_search(A[ma], B, nb);
-      C[ma+mb] = A[ma];
-      rec_merge_tre(C, A, ma, B, mb);
-      C = C+ma+mb+1;
-      A = A+ma+1;
-      na = na-ma-1;
-      B = B+mb;
-      nb = nb-mb;
     }
   }
 }
 
 void crec_merge_tre(int *C, int *A, int na, int *B, int nb) {
   while (na > 0) {
+    int ma = na/2;
+    int mb = binary_search(A[ma], B, nb);
+    C[ma+mb] = A[ma];
+    cilk_spawn crec_merge_tre(C, A, ma, B, mb);
+    C = C+ma+mb+1;
+    A = A+ma+1;
+    na = na-ma-1;
+    B = B+mb;
+    nb = nb-mb;
     if (na < nb) {
       int *tmp = B;
       B = A;
@@ -142,16 +150,6 @@ void crec_merge_tre(int *C, int *A, int na, int *B, int nb) {
       int t = nb;
       nb = na;
       na = t;
-    } else {
-      int ma = na/2;
-      int mb = binary_search(A[ma], B, nb);
-      C[ma+mb] = A[ma];
-      cilk_spawn crec_merge_tre(C, A, ma, B, mb);
-      C = C+ma+mb+1;
-      A = A+ma+1;
-      na = na-ma-1;
-      B = B+mb;
-      nb = nb-mb;
     }
   }
   cilk_sync;
@@ -179,7 +177,8 @@ int main() {
     arr_cpy(B, tmp, n);
 
     std::cout << "Starting round " << round+1 << "..." << std::endl;
-  
+
+    for(int i = 0; i < 2*n; i++) M[i] = 0;
     t = clock();
     merge(M, A, n, B, n);
     t = clock() - t;
@@ -187,6 +186,7 @@ int main() {
     std::cout <<  "In " << ans[0] / (round + 1) << " merge is " << isSorted(M, n) << std::endl;
     //print_arr(B, n);
   
+    for(int i = 0; i < 2*n; i++) M[i] = 0;
     t = clock();
     rec_merge(M, A, n, B, n);
     t = clock() - t;
@@ -194,6 +194,7 @@ int main() {
     std::cout <<  "In " << ans[1] / (round + 1) << " rec_merge is " << isSorted(M, n) << std::endl;
     //print_arr(B, n);
   
+    for(int i = 0; i < 2*n; i++) M[i] = 0;
     t = clock();
     crec_merge(M, A, n, B, n);
     t = clock() - t;
@@ -201,6 +202,7 @@ int main() {
     std::cout <<  "In " << ans[2] / (round + 1) << " crec_merge is " << isSorted(M, n) << std::endl;
     //print_arr(B, n);
   
+    for(int i = 0; i < 2*n; i++) M[i] = 0;
     t = clock();
     rec_merge_tre(M, A, n, B, n);
     t = clock() - t;
@@ -208,6 +210,7 @@ int main() {
     std::cout <<  "In " << ans[3] / (round + 1) << " rec_merge_tre is " << isSorted(M, n) << std::endl;
     //print_arr(B, n);
   
+    for(int i = 0; i < 2*n; i++) M[i] = 0;
     t = clock();
     crec_merge_tre(M, A, n, B, n);
     t = clock() - t;
