@@ -111,6 +111,14 @@ void crec_merge(int *C, int *A, int na, int *B, int nb) {
 }
 
 void rec_merge_tre(int *C, int *A, int na, int *B, int nb) {
+  if (na < nb) {
+    int *tmp = B;
+    B = A;
+    A = tmp;
+    int t = nb;
+    nb = na;
+    na = t;
+  }
   while (na > 0) {
     int ma = na/2;
     int mb = binary_search(A[ma], B, nb);
@@ -133,6 +141,14 @@ void rec_merge_tre(int *C, int *A, int na, int *B, int nb) {
 }
 
 void crec_merge_tre(int *C, int *A, int na, int *B, int nb) {
+  if (na < nb) {
+    int *tmp = B;
+    B = A;
+    A = tmp;
+    int t = nb;
+    nb = na;
+    na = t;
+  }
   while (na > 0) {
     int ma = na/2;
     int mb = binary_search(A[ma], B, nb);
